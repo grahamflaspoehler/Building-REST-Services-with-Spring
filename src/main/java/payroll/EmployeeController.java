@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class EmployeeController {
@@ -25,8 +26,17 @@ public class EmployeeController {
   //Aggregate root
 
   @GetMapping("/employees")
-  List<Employee> all() {
-    return repository.findAll();
+  CollectionModel<EntityModel<Employee>> all() {
+
+    List<EntityModel<Employee>> employees = repository.findAll().stream()
+      .map(employee -> new EntityModel<>(employee,
+        linkTo(methodOn(EmployeeController.class).one(employee.getId())).withSelfRel(),
+        linkTo(methodOn(EmployeeController.class).all()).withRel("employees")
+        ))
+      .collect(Collectors.toList());
+
+    return new CollectionModel<>(employees,
+      linkTo(methodOn(EmployeeController.class).all()).withSelfRel());
   }
 
   @PostMapping("/employees")
