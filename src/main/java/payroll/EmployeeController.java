@@ -31,10 +31,7 @@ public class EmployeeController {
   CollectionModel<EntityModel<Employee>> all() {
 
     List<EntityModel<Employee>> employees = repository.findAll().stream()
-      .map(employee -> new EntityModel<>(employee,
-        linkTo(methodOn(EmployeeController.class).one(employee.getId())).withSelfRel(),
-        linkTo(methodOn(EmployeeController.class).all()).withRel("employees")
-        ))
+      .map(assembler::toModel)
       .collect(Collectors.toList());
 
     return new CollectionModel<>(employees,
